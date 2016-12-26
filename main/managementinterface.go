@@ -340,6 +340,8 @@ func handleSettingsSetRequest(w http.ResponseWriter, r *http.Request) {
 							continue
 						}
 						globalSettings.StaticIps = ips
+					case "Training_Enabled": 
+						globalSettings.Training_Enabled = val.(bool)
 					default:
 						log.Printf("handleSettingsSetRequest:json: unrecognized key:%s\n", key)
 					}

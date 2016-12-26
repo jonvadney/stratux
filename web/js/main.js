@@ -15,6 +15,8 @@ var URL_REBOOT			= "http://" + URL_HOST_BASE + "/reboot";
 var URL_SHUTDOWN		= "http://" + URL_HOST_BASE + "/shutdown";
 var URL_RESTARTAPP      = "http://" + URL_HOST_BASE + "/restart";
 var URL_DEV_TOGGLE_GET  = "http://" + URL_HOST_BASE + "/develmodetoggle";
+var URL_TRAINING_GET    = "http://" + URL_HOST_BASE + "/getTraining";
+var URL_TRAINING_SET    = "http://" + URL_HOST_BASE + "/setTraining";
 
 // define the module with dependency on mobile-angular-ui
 //var app = angular.module('stratux', ['ngRoute', 'mobile-angular-ui', 'mobile-angular-ui.gestures', 'appControllers']);
@@ -70,6 +72,12 @@ app.config(function ($stateProvider, $urlRouterProvider) {
 			url: '/developer',
 			templateUrl: 'plates/developer.html',
 			controller: 'DeveloperCtrl',
+			reloadOnSearch: false
+		})
+		.state('training', {
+			url: '/training',
+			templateUrl: 'plates/training.html',
+			controller: 'TrainingCtrl',
 			reloadOnSearch: false
 		});
 	$urlRouterProvider.otherwise('/');

@@ -1035,6 +1035,7 @@ type settings struct {
 	WatchList            string
 	DeveloperMode        bool
 	StaticIps            []string
+	Training_Enabled     bool
 }
 
 type status struct {
@@ -1098,13 +1099,16 @@ func defaultSettings() {
 	globalSettings.OwnshipModeS = "F00000"
 	globalSettings.DeveloperMode = false
 	globalSettings.StaticIps = make([]string, 0)
+	globalSettings.Training_Enabled = false
 }
 
 func readSettings() {
+	// Read default settings so if any value isn't initialized its set with defaults
+	defaultSettings()
+
 	fd, err := os.Open(configLocation)
 	if err != nil {
 		log.Printf("can't read settings %s: %s\n", configLocation, err.Error())
-		defaultSettings()
 		return
 	}
 	defer fd.Close()
@@ -1112,14 +1116,12 @@ func readSettings() {
 	count, err := fd.Read(buf)
 	if err != nil {
 		log.Printf("can't read settings %s: %s\n", configLocation, err.Error())
-		defaultSettings()
 		return
 	}
 	var newSettings settings
 	err = json.Unmarshal(buf[0:count], &newSettings)
 	if err != nil {
 		log.Printf("can't read settings %s: %s\n", configLocation, err.Error())
-		defaultSettings()
 		return
 	}
 	globalSettings = newSettings
@@ -1281,6 +1283,7 @@ func gracefulShutdown() {
 	// Shut down SDRs.
 	sdrKill()
 	pingKill()
+	trainingKill()
 
 	// Shut down data logging.
 	if dataLogStarted {
@@ -1379,6 +1382,7 @@ func main() {
 	sdrInit()
 	pingInit()
 	initTraffic()
+	trainingInit()
 
 	// Read settings.
 	readSettings()
