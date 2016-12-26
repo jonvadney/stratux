@@ -39,13 +39,10 @@ cp -f dhcpd.conf mnt/etc/dhcp/dhcpd.conf
 
 #hostapd config
 cp -f hostapd.conf mnt/etc/hostapd/hostapd.conf
-cp -f hostapd-edimax.conf mnt/etc/hostapd/hostapd-edimax.conf
 #hostapd manager script
 cp -f hostapd_manager.sh mnt/usr/sbin/hostapd_manager.sh
 chmod 755 mnt/usr/sbin/hostapd_manager.sh
 #hostapd
-cp -f hostapd-edimax mnt/usr/sbin/hostapd-edimax
-chmod 755 mnt/usr/sbin/hostapd-edimax
 #remove hostapd startup scripts
 rm -f mnt/etc/rc*.d/*hostapd mnt/etc/network/if-pre-up.d/hostapd mnt/etc/network/if-post-down.d/hostapd mnt/etc/init.d/hostapd mnt/etc/default/hostapd
 #interface config

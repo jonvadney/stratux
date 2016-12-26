@@ -17,7 +17,6 @@ DAEMON_USER_PREF=/etc/hostapd/hostapd.user
 
 function hostapd-upgrade {
 	DAEMON_CONF=/etc/hostapd/hostapd.conf
-	DAEMON_CONF_EDIMAX=/etc/hostapd/hostapd-edimax.conf
 	HOSTAPD_VALUES=('ssid=' 'channel=' 'auth_algs=' 'wpa=' 'wpa_passphrase=' 'wpa_key_mgmt=' 'wpa_pairwise=' 'rsn_pairwise=')
 	HOSTAPD_VALUES_RM=('#auth_algs=' '#wpa=' '#wpa_passphrase=' '#wpa_key_mgmt=' '#wpa_pairwise=' '#rsn_pairwise=')
 
@@ -27,7 +26,6 @@ function hostapd-upgrade {
         then
 			grep "^$i" $DAEMON_CONF >> $DAEMON_USER_PREF
 			sed -i '/^'"$i"'/d' $DAEMON_CONF
-			sed -i '/^'"$i"'/d' $DAEMON_CONF_EDIMAX
 		fi
 	done
 	for i in "${HOSTAPD_VALUES_RM[@]}"
@@ -35,7 +33,6 @@ function hostapd-upgrade {
 		if grep -q "^$i" $DAEMON_CONF
         then
 			sed -i '/^'"$i"'/d' $DAEMON_CONF
-			sed -i '/^'"$i"'/d' $DAEMON_CONF_EDIMAX
 		fi
 	done
 	sleep 1     #make sure there is time to get the file written before checking for it again
@@ -55,30 +52,16 @@ function ap-start {
 	/usr/bin/killall -9 hostapd hostapd-edimax hostapd-edimax-alt hostapd-edimax-newest
 	/usr/sbin/service isc-dhcp-server stop
 
-	#EDIMAX Mac Addresses from http://www.adminsub.net/mac-address-finder/edimax
-	#for logic check all addresses must be lowercase
-	# 74:da:38 is my MAC on my NANO
-	edimaxMac=(80:1f:02 74:da:38 00:50:fc 00:1f:1f 00:0e:2e 00:00:b4)
-
 	#Assume PI3 settings
 	DAEMON_CONF=/etc/hostapd/hostapd.conf
 	DAEMON_SBIN=/usr/sbin/hostapd
 
 	# Location of temporary hostapd.conf built by combining
-	# non-editable /etc/hostapd/hostapd.conf or hostapd-edimax.conf
+	# non-editable /etc/hostapd/hostapd.conf
 	# and the user configurable /etc/hostapd/hostapd.conf
 	DAEMON_TMP=/tmp/hostapd.conf
 
-	#get the first 3 octets of the MAC(XX:XX:XX) at wlan0
-	wlan0mac=$(head -c 8 /sys/class/net/wlan0/address)
-
-	# Is there an Edimax Mac Address at wlan0
-	if [[ ${edimaxMac[*]} =~ "$wlan0mac" ]]; then
-	     DAEMON_CONF=/etc/hostapd/hostapd-edimax.conf
-	     DAEMON_SBIN=/usr/sbin/hostapd-edimax
-	fi
-
-	#Make a new hostapd or hostapd-edimax conf file based on logic above
+	#Make a new hostapd conf file based on logic above
 	cat ${DAEMON_USER_PREF} <(echo) ${DAEMON_CONF} > ${DAEMON_TMP}
 
 	${DAEMON_SBIN} -B ${DAEMON_TMP}
