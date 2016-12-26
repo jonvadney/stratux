@@ -13,7 +13,7 @@ OPT_C=false
 OPT_E=false
 OPT_O=false
 
-#defaultPass="Squawk1200"
+defaultPass="Squawk1200"
 
 parm="*"
 err="####"
@@ -41,7 +41,7 @@ function HELP {
   echo "${REV}-c${NORM}  --Sets the channel to ${BOLD}chan${NORM}. \"-c 1\""
   echo "${REV}-e${NORM}  --Turns on encryption with passphrase ${BOLD}pass${NORM}. 8-63 Printable Characters(ascii 32-126). Cannot be used with -o. \"-e password!\""
   echo "${REV}-o${NORM}  --Turns off encryption and sets network to open. Cannot be used with -e."
-  echo "${REV}-q${NORM}  --Run silently."
+  #echo "${REV}-q${NORM}  --Run silently."
   echo -e "${REV}-h${NORM}  --Displays this help message. No further functions are performed."\\n
   echo -e "Example: ${BOLD}$SCRIPT -s Stratux-N3558D -c 5${NORM}"\\n
   exit 1
