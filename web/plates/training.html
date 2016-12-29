@@ -4,29 +4,90 @@
 			<span class="panel_label">Training</span>
 		</div>
 		<div class="panel-body">
+
+			<!-- General Settings -->
 			<div class="panel-group col-sm-6">
 				<div class="panel panel-default">
 					<div class="panel-heading">General</div>
 					<div class="panel-body">
 						<!-- Add General Training Settings -->
 						<div class="form-group">
-							<label class="control-label col-xs-7">Enabled</label>
+							<label class="control-label col-xs-7">Traffic Enabled</label>
 							<div class="col-xs-5">
-								<ui-switch ng-model='Training_Enabled' settings-change></ui-switch>
+								<ui-switch ng-model='Traffic_Enabled' settings-change></ui-switch>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-<div class="panel-group col-sm-6">
-<div class="panel panel-default">
-<div class="panel-heading">Traffic</div>
-<div class="panel-body">
-<!-- Add Traffic Settings --> 
-Traffic Settings
-</div>
-</div>
-</div>
+
+			<!-- Traiffic Settings --> 
+			<div class="panel-group col-sm-6" ng-show="Traffic_Enabled">
+				<div class="panel panel-default">
+					<div class="panel-heading">Traffic</div>
+					<div class="panel-body">
+						<!-- Add Traffic Settings --> 
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Target</label>
+							<div class="col-xs-5">
+								<select ng-model="myTraffic" ng-options="traffic.Tail for traffic in Traffic">
+									<option value="">-- New --</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Tail Number</label>
+							<input class="col-xs-7" type="string" required ng-model="myTraffic.Tail" placeholder="Tail Number" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Initial Lat</label>
+							<input class="col-xs-7" type="number" step=".01" required ng-model="myTraffic.InitLat" placeholder="Initial Lat" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Initial Lon</label>
+							<input class="col-xs-7" type="number" step=".01" required ng-model="myTraffic.InitLon" placeholder="Initial Lon" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Altitude</label>
+							<input class="col-xs-7" type="number" step="1" required ng-model="myTraffic.Alt" placeholder="Altitude" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Heading</label>
+							<input class="col-xs-7" type="number" required ng-model="myTraffic.Hdg" placeholder="Heading" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Speed</label>
+							<input class="col-xs-7" type="number" required ng-model="myTraffic.Speed" placeholder="Speed" />
+						</div>
+						<div class="form-group reset-flow">
+							<label class="control-label col-xs-5">Enabled</label>
+							<div class="col-xs-5">
+								<ui-switch ng-model='myTraffic.Enabled' settings-change></ui-switch>
+							</div>
+						</div>
+						<div class="form-group reset-flow">
+							<div class="col-xs-6">
+								<button class="btn btn-primary btn-block" ng-disabled="!currentTrafficValid()" ng-click="saveTrafic()">Save</button>
+							</div>
+							<div class="col-xs-6">
+								<button class="btn btn-primary btn-block" ng-disabled="myTraffic.Existing != true">Delete</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- GPS Settings --> 
+<!--
+			<div class="panel-group col-sm-6">
+				<div class="panel panel-default">
+					<div class="panel-heading">Traffic</div>
+					<div class="panel-body">
+
+					</div>
+				</div>
+			</div>
+-->
 		</div>
 	</div>
 </div>

@@ -135,6 +135,8 @@ func (e *ES) read() {
 	// the "done" channel, which ensures we don't leak
 	// goroutines...
 	close(done)
+
+	log.Println("ES read(): shutdown complete...")
 }
 
 func (u *UAT) read() {
@@ -165,6 +167,7 @@ func (u *UAT) read() {
 			return
 		}
 	}
+	log.Println("UAT read(): shutdown complete...")
 }
 
 func getPPM(serial string) int {

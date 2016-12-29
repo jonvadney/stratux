@@ -6,7 +6,7 @@ function TrainingCtrl($rootScope, $scope, $state, $location, $window, $http) {
 
 	$scope.$parent.helppage = 'plates/training-help.html';
 
-	var toggles = ['Training_Enabled'];
+	var toggles = ['Traffic_Enabled'];
 	var settings = {};
 	for (i = 0; i < toggles.length; i++) {
 		settings[toggles[i]] = undefined;
@@ -14,12 +14,17 @@ function TrainingCtrl($rootScope, $scope, $state, $location, $window, $http) {
 
 	function loadSettings(data) {
 		settings = angular.fromJson(data);
-		$scope.Training_Enabled = settings.Training_Enabled
+		$scope.Traffic_Enabled = settings.Traffic_Enabled
+
+		for (i = 0; i < settings.Traffic.length; i++) {
+			settings.Traffic[i].Existing = true
+		}
+		$scope.Traffic = settings.Traffic
 	}
 
 	function getSettings() {
 		// Simple GET request example (note: responce is asynchronous)
-		$http.get(URL_SETTINGS_GET).
+		$http.get(URL_TRAINING_SETTINGS_GET).
 		then(function (response) {
 			loadSettings(response.data);
 			// $scope.$apply();
@@ -32,7 +37,7 @@ function TrainingCtrl($rootScope, $scope, $state, $location, $window, $http) {
 
 	function setSettings(msg) {
 		// Simple POST request example (note: responce is asynchronous)
-		$http.post(URL_SETTINGS_SET, msg).
+		$http.post(URL_TRAINING_SETTINGS_SET, msg).
 		then(function (response) {
 			loadSettings(response.data);
 			// $scope.$apply();
@@ -62,4 +67,40 @@ function TrainingCtrl($rootScope, $scope, $state, $location, $window, $http) {
 			setSettings(angular.toJson(newsettings));
 		}
 	});
+
+	$scope.currentTrafficValid = function () {
+		var valid = true;
+
+		if ($scope.myTraffic != undefined) {
+			//Check that all fields are set
+			if ($scope.myTraffic.Tail != undefined && 
+				$scope.myTraffic.InitLat != undefined && 
+				$scope.myTraffic.InitLon != undefined &&
+				$scope.myTraffic.Alt != undefined &&
+				$scope.myTraffic.Hdg != undefined && 
+				$scope.myTraffic.Speed != undefined) {
+
+				//Check if its not an existing item the tail number isn't reused
+				if ($scope.myTraffic.Existing != true) {
+					for (i = 0; i < $scope.Traffic.length; i++) {
+						if ($scope.Traffic[i].Tail == $scope.myTraffic.Tail) {
+							valid = false; 
+						}
+					}	
+				} 
+			} else {
+				valid = false;
+			}
+		} else { 
+			valid = false; 
+		}
+
+		return valid;
+	};
+
+	$scope.saveTrafic = function () {
+		var traffic = { Traffic: { Tail: $scope.myTraffic.Tail, InitLat: $scope.myTraffic.InitLat, InitLon: $scope.myTraffic.InitLon, Alt: $scope.myTraffic.Alt, Hdg: $scope.myTraffic.Hdg, Speed: $scope.myTraffic.Speed, Enabled: $scope.myTraffic.Enabled } }
+
+		setSettings(angular.toJson(traffic))
+	}
 }

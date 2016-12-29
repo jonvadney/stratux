@@ -19,8 +19,10 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"os/exec"
+	"reflect"
 	"regexp"
 	"strings"
 	"syscall"
@@ -340,8 +342,6 @@ func handleSettingsSetRequest(w http.ResponseWriter, r *http.Request) {
 							continue
 						}
 						globalSettings.StaticIps = ips
-					case "Training_Enabled": 
-						globalSettings.Training_Enabled = val.(bool)
 					default:
 						log.Printf("handleSettingsSetRequest:json: unrecognized key:%s\n", key)
 					}
@@ -353,6 +353,69 @@ func handleSettingsSetRequest(w http.ResponseWriter, r *http.Request) {
 		// while it may be redundent, we return the latest settings
 		settingsJSON, _ := json.Marshal(&globalSettings)
 		fmt.Fprintf(w, "%s\n", settingsJSON)
+	}
+}
+
+func handleTrainingSettingsGetRequest(w http.ResponseWriter, r *http.Request) {
+	setNoCache(w)
+	setJSONHeaders(w)
+
+	trainingSettingsJSON, _ := json.Marshal(&globalTrainingSettings)
+	fmt.Fprintf(w, "%s\n", trainingSettingsJSON)
+}
+
+func handleTrainingSettingsSetRequest(w http.ResponseWriter, r *http.Request) {
+	// define header in support of cross-domain AJAX
+	setNoCache(w)
+	setJSONHeaders(w)
+	w.Header().Set("Access-Control-Allow-Method", "GET, POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+
+	// for an OPTION method request, we return header without processing.
+	// this insures we are recognized as supporting cross-domain AJAX REST calls
+	if r.Method == "POST" {
+		raw, _ := httputil.DumpRequest(r, true)
+		log.Printf("handleTrainingTrafficSetRequest:raw: %s\n", raw)
+
+		decoder := json.NewDecoder(r.Body)
+		for {
+			var msg map[string]interface{} // support arbitrary JSON
+
+			err := decoder.Decode(&msg)
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				log.Printf("handleSettingsSetRequest:error: %s\n", err.Error())
+			} else {
+				for key, val := range msg {
+					log.Printf("handleTrainingSettingsSetRequest:json: testing for key:%s of type %s\n", key, reflect.TypeOf(val))
+
+					switch key {
+					case "Traffic_Enabled": 
+						globalTrainingSettings.Traffic_Enabled = val.(bool)
+					case "Traffic": 
+						var traffic TrainingTraffic
+						trafficMap := val.(map[string]interface{})
+
+						traffic.Tail = trafficMap["Tail"].(string)
+						traffic.InitLat = float32(trafficMap["InitLat"].(float64))
+						traffic.InitLon = float32(trafficMap["InitLon"].(float64))
+						traffic.Alt = float32(trafficMap["Alt"].(float64))
+						traffic.Hdg = int32(trafficMap["Hdg"].(float64))
+						traffic.Speed = trafficMap["Speed"].(float64)
+						traffic.Enabled = trafficMap["Enabled"].(bool)
+
+						addTrainingTraffic(traffic)
+					default:
+						log.Printf("handleTrainingSettingsSetRequest:json: unrecognized key:%s\n", key)
+					}
+				}
+				saveTrainingSettings()
+			}
+		}
+
+		trainingSettingsJSON, _ := json.Marshal(&globalTrainingSettings)
+		fmt.Fprintf(w, "%s\n", trainingSettingsJSON)
 	}
 }
 
@@ -617,6 +680,8 @@ func managementInterface() {
 	http.HandleFunc("/updateUpload", handleUpdatePostRequest)
 	http.HandleFunc("/roPartitionRebuild", handleroPartitionRebuild)
 	http.HandleFunc("/develmodetoggle", handleDevelModeToggle)
+	http.HandleFunc("/getTrainingSettings", handleTrainingSettingsGetRequest)
+	http.HandleFunc("/setTrainingSettings", handleTrainingSettingsSetRequest)
 
 	err := http.ListenAndServe(managementAddr, nil)
 
